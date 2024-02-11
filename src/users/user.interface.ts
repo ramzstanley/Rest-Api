@@ -1,5 +1,5 @@
 export interface User {
-    username: string,
+    username : string,
     email : string,
     password : string
 }
@@ -9,5 +9,5 @@ export interface UnitUser extends User {
 }
 
 export interface Users {
-    [key : string ] : UnitUser
+    [key : string] : UnitUser
 }
