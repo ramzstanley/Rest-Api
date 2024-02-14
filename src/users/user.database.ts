@@ -57,30 +57,38 @@ export const create = async (userData: UnitUser): Promise<UnitUser | null> => {
     return user;
 };
 
-export const findByEmail = async (user_email: string): Promise<null | UnitUser> => {
-    
+export const findByEmail = async (user_email: string): Promise<UnitUser[]> => {
     const allUsers = await findAll();
+    const exactMatch = allUsers.filter((user) => user.email.toLowerCase() === user_email.toLowerCase());
+    const partialMatch = allUsers.filter((user) => user.email.toLowerCase().includes(user_email.toLowerCase()));
+    return [...exactMatch, ...partialMatch];
+};
 
-    const getUser = allUsers.find(result => user_email === result.email);
 
-    if (!getUser) {
+export const findByUsername = async (username: string): Promise<UnitUser[]> => {
+    const allUsers = await findAll();
+    const filteredUsers = allUsers.filter((user) => user.username.toLowerCase().includes(username.toLowerCase()));
+    return filteredUsers;
+};
+
+
+export const comparePassword = async (email: string, supplied_password: string): Promise<UnitUser | null> => {
+    const users = await findByEmail(email);
+
+    if (!users || users.length === 0) {
         return null;
     }
 
-    return getUser;
-};
 
-export const comparePassword = async (email : string, supplied_password : string) : Promise<null | UnitUser> => {
-    
-    const user = await findByEmail(email)
+    const user = users[0];
 
-    const decryptPassword = await bcrypt.compare(supplied_password, user!.password)
+    const decryptPassword = await bcrypt.compare(supplied_password, user.password);
 
     if (!decryptPassword) {
-        return null
+        return null;
     }
 
-    return user
+    return user;
 };
 
 export const update = async (id : string, updateValues : User) : Promise<UnitUser | null> => {

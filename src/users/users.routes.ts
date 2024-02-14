@@ -124,3 +124,34 @@ userRouter.delete("/user/:id", async(req: Request, res : Response) =>{
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({error})
     }
 })
+
+userRouter.get("/users/search", async (req: Request, res: Response) => {
+    try {
+        const { name, email } = req.query;
+
+        if (name === undefined && email === undefined) {
+            const allUsers = await database.findAll();
+            return res.status(StatusCodes.OK).json(allUsers);
+        }
+
+        let filteredUsers: UnitUser[] = [];
+
+        if (name !== undefined) {
+            const usersByName = await database.findByUsername(name.toString());
+            if (usersByName) {
+                filteredUsers = filteredUsers.concat(usersByName);
+            }
+        }
+
+        if (email !== undefined) {
+            const usersByEmail = await database.findByEmail(email.toString());
+            if (usersByEmail) {
+                filteredUsers = filteredUsers.concat(usersByEmail);
+            }
+        }
+
+        return res.status(StatusCodes.OK).json(filteredUsers);
+    } catch (error) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error });
+    }
+});
